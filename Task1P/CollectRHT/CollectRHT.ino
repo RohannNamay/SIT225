@@ -9,7 +9,7 @@ float hum, temp; // hum stores RH, temp stores Temperature
 
 void setup() {
   // Set baud rate 
-  Serial.begin(9600)
+  Serial.begin(9600);
   dht.begin();
 }
 
