@@ -1,3 +1,4 @@
+```python
 import serial
 import csv
 import pandas as pd
@@ -16,26 +17,25 @@ csv_path = os.path.abspath(csv_name)
 # Open a csv file
 file_exists = os.path.exists(csv_name)
 
-logging = open(
-    csv_name,
-    mode='a',
-    newline='',
-    encoding='utf-8'
-)
-
 # Open a serial port that is connected to an Arduino
 ser = serial.Serial('COM5', baud_rate, timeout=5)
 ser.flushInput()
 
 # Write CSV headers
 if not file_exists:
-    writer = csv.writer(logging)
-    writer.writerow([
-        'Session',
-        'Timestamp',
-        'Humidity (%)',
-        'Temperature (°C)'
-    ])
+    with open(
+        csv_name,
+        mode='a',
+        newline='',
+        encoding='utf-8'
+    ) as logging:
+        writer = csv.writer(logging)
+        writer.writerow([
+            'Session',
+            'Timestamp',
+            'Humidity (%)',
+            'Temperature (°C)'
+        ])
 
 # Create a list to buffer sensor readings
 data = []
@@ -48,7 +48,10 @@ try:
         # Read in data from Serial until a new line is received
         ser_bytes = ser.readline()
         # Convert received bytes into text format
-        decoded_bytes = ser_bytes.decode("utf-8").strip()
+        try:
+            decoded_bytes = ser_bytes.decode("utf-8").strip()
+        except UnicodeDecodeError:
+            continue
 
         if decoded_bytes:
 
@@ -62,11 +65,15 @@ try:
 
             if len(sensor_data) == 2:
 
-                # Retrieve current time
-                current_time = datetime.now()
+                try:
+                    # Retrieve current time
+                    current_time = datetime.now()
 
-                humidity = float(sensor_data[0].strip())
-                temperature = float(sensor_data[1].strip())
+                    humidity = float(sensor_data[0].strip())
+                    temperature = float(sensor_data[1].strip())
+                except ValueError:
+                    print("Invalid sensor reading:", decoded_bytes)
+                    continue
 
                 print(
                     current_time.strftime(
@@ -116,7 +123,7 @@ finally:
 
     # Close serial port and CSV file
     ser.close()
-    logging.close()
 
 print(f"CSV saved to: {csv_path}")
 print("Logging finished.")
+```
