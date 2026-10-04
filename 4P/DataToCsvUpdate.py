@@ -1,4 +1,3 @@
-```python
 import serial
 import csv
 import pandas as pd
@@ -126,4 +125,3 @@ finally:
 
 print(f"CSV saved to: {csv_path}")
 print("Logging finished.")
-```
